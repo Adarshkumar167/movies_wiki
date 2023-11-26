@@ -8,14 +8,25 @@ class MovieDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Extract movie details from movieData and display them here
     final show = movieData['show'];
     final image = show['image'];
     final summary = show['summary'] ?? '';
+    final language = show['language'] ?? 'Unknown';
 
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: Text(show['name'] ?? 'Unknown'),
+        backgroundColor: Colors.black,
+        title: Text(
+          show['name'] ?? 'Unknown',
+          style: const TextStyle(color: Colors.white),
+        ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(10.0),
@@ -23,13 +34,40 @@ class MovieDetails extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (image != null && image['medium'] != null)
-              Image.network(image['medium']),
+              Center(
+                child: Image.network(image['medium']),
+              ),
             const SizedBox(height: 10),
-            Text(
-              show['name'] ?? 'Unknown',
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: Text(
+                show['name'] ?? 'Unknown',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: Row(
+                children: [
+                  const Text(
+                    'Language: ',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Text(
+                    language,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
               ),
             ),
             Html(
@@ -37,10 +75,10 @@ class MovieDetails extends StatelessWidget {
               style: {
                 'body': Style(
                   fontSize: FontSize(16.0),
+                  color: Colors.white,
                 ),
               },
             ),
-            // Add more details as needed
           ],
         ),
       ),

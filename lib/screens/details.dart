@@ -36,12 +36,17 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey,
       appBar: AppBar(
+        backgroundColor: Colors.black,
         title: GestureDetector(
           onTap: () {
             _navigateToSearchScreen();
           },
-          child: const Text('Search'),
+          child: const Text(
+            'Search',
+            style: TextStyle(color: Colors.white),
+          ),
         ),
       ),
       body: ListView.builder(
@@ -111,22 +116,26 @@ class _HomePageState extends State<HomePage> {
           );
         },
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
+      bottomNavigationBar: NavigationBar(
+        backgroundColor: Colors.black,
+        items: [
+          NavigationBarItem(
+            icon: Icons.home,
             label: 'Home',
+            onTap: () {
+              // Handle Home tap
+            },
+            selected: true,
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search),
+          NavigationBarItem(
+            icon: Icons.search,
             label: 'Search',
+            onTap: () {
+              _navigateToSearchScreen();
+            },
+            selected: false,
           ),
         ],
-        onTap: (index) {
-          if (index == 1) {
-            _navigateToSearchScreen();
-          }
-        },
       ),
     );
   }
@@ -143,6 +152,69 @@ class _HomePageState extends State<HomePage> {
       context,
       MaterialPageRoute(
         builder: (context) => MovieDetails(movieData: movieData),
+      ),
+    );
+  }
+}
+
+class NavigationBar extends StatelessWidget {
+  final Color backgroundColor;
+  final List<NavigationBarItem> items;
+
+  const NavigationBar({
+    super.key,
+    required this.backgroundColor,
+    required this.items,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: backgroundColor,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: items,
+      ),
+    );
+  }
+}
+
+class NavigationBarItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final bool selected;
+
+  const NavigationBarItem({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    required this.selected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: selected ? Colors.lightBlue : Colors.white,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                color: selected ? Colors.lightBlue : Colors.white,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

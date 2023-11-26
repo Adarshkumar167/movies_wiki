@@ -18,21 +18,32 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey,
       appBar: AppBar(
+        backgroundColor: Colors.black,
         title: TextField(
           controller: _searchController,
           decoration: const InputDecoration(
             hintText: 'Search for a movie...',
+            hintStyle: TextStyle(color: Colors.white70),
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Colors.transparent),
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Colors.transparent),
+            ),
           ),
+          style: const TextStyle(color: Colors.white),
         ),
         actions: [
           IconButton(
             onPressed: () {
               searchMovies();
             },
-            icon: const Icon(Icons.search),
+            icon: const Icon(Icons.search, color: Colors.white),
           ),
         ],
+        automaticallyImplyLeading: false, // Removes the back button
       ),
       body: ListView.builder(
         itemCount: _searchResults.length,
@@ -101,22 +112,26 @@ class _SearchScreenState extends State<SearchScreen> {
           );
         },
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
+      bottomNavigationBar: NavigationBar(
+        backgroundColor: Colors.black,
+        items: [
+          NavigationBarItem(
+            icon: Icons.home,
             label: 'Home',
+            onTap: () {
+              Navigator.pop(context);
+            },
+            selected: false,
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search),
+          NavigationBarItem(
+            icon: Icons.search,
             label: 'Search',
+            onTap: () {
+              // Do nothing since we are already on the SearchScreen
+            },
+            selected: true,
           ),
         ],
-        onTap: (index) {
-          if (index == 0) {
-            Navigator.pop(context);
-          }
-        },
       ),
     );
   }
@@ -142,5 +157,68 @@ class _SearchScreenState extends State<SearchScreen> {
     } else {
       throw Exception('Failed to search movies');
     }
+  }
+}
+
+class NavigationBar extends StatelessWidget {
+  final Color backgroundColor;
+  final List<NavigationBarItem> items;
+
+  const NavigationBar({
+    super.key,
+    required this.backgroundColor,
+    required this.items,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: backgroundColor,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: items,
+      ),
+    );
+  }
+}
+
+class NavigationBarItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final bool selected;
+
+  const NavigationBarItem({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    required this.selected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: selected ? Colors.lightBlue : Colors.white,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                color: selected ? Colors.lightBlue : Colors.white,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
