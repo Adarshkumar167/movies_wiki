@@ -2,52 +2,42 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_html/flutter_html.dart';
-import 'package:movies_list/screens/search_screen.dart';
-import 'movie_details.dart';
+import 'package:movies_list/screens/movie_details.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class SearchScreen extends StatefulWidget {
+  const SearchScreen({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<SearchScreen> createState() => _SearchScreenState();
 }
 
-class _HomePageState extends State<HomePage> {
-  List _movies = [];
-
-  @override
-  void initState() {
-    super.initState();
-    fetchMovies();
-  }
-
-  Future<void> fetchMovies() async {
-    final response =
-        await http.get(Uri.parse("https://api.tvmaze.com/search/shows?q=all"));
-    if (response.statusCode == 200) {
-      setState(() {
-        _movies = jsonDecode(response.body);
-      });
-    } else {
-      throw Exception('Failed to load movies');
-    }
-  }
+class _SearchScreenState extends State<SearchScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  List _searchResults = [];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: GestureDetector(
-          onTap: () {
-            _navigateToSearchScreen();
-          },
-          child: const Text('Search'),
+        title: TextField(
+          controller: _searchController,
+          decoration: const InputDecoration(
+            hintText: 'Search for a movie...',
+          ),
         ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              searchMovies();
+            },
+            icon: const Icon(Icons.search),
+          ),
+        ],
       ),
       body: ListView.builder(
-        itemCount: _movies.length,
+        itemCount: _searchResults.length,
         itemBuilder: (context, index) {
-          final show = _movies[index]['show'];
+          final show = _searchResults[index]['show'];
           final image = show['image'];
           final summary = show['summary'] ?? '';
           final truncatedSummary =
@@ -55,7 +45,7 @@ class _HomePageState extends State<HomePage> {
 
           return InkWell(
             onTap: () {
-              _navigateToMovieDetails(_movies[index]);
+              _navigateToMovieDetails(_searchResults[index]);
             },
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 2),
@@ -123,18 +113,11 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
         onTap: (index) {
-          if (index == 1) {
-            _navigateToSearchScreen();
+          if (index == 0) {
+            Navigator.pop(context);
           }
         },
       ),
-    );
-  }
-
-  void _navigateToSearchScreen() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const SearchScreen()),
     );
   }
 
@@ -145,5 +128,19 @@ class _HomePageState extends State<HomePage> {
         builder: (context) => MovieDetails(movieData: movieData),
       ),
     );
+  }
+
+  Future<void> searchMovies() async {
+    final searchTerm = _searchController.text;
+    final response = await http
+        .get(Uri.parse("https://api.tvmaze.com/search/shows?q=$searchTerm"));
+
+    if (response.statusCode == 200) {
+      setState(() {
+        _searchResults = jsonDecode(response.body);
+      });
+    } else {
+      throw Exception('Failed to search movies');
+    }
   }
 }
