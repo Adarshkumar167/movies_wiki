@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_html/flutter_html.dart';
-import 'package:movies_list/screens/search_screen.dart';
-import 'movie_details.dart';
+import 'package:movies_list/screens/movie_details.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -13,7 +12,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List _movies = [];
+  List _searchResults = [];
 
   @override
   void initState() {
@@ -26,7 +25,7 @@ class _HomePageState extends State<HomePage> {
         await http.get(Uri.parse("https://api.tvmaze.com/search/shows?q=all"));
     if (response.statusCode == 200) {
       setState(() {
-        _movies = jsonDecode(response.body);
+        _searchResults = jsonDecode(response.body);
       });
     } else {
       throw Exception('Failed to load movies');
@@ -36,13 +35,11 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey,
+      backgroundColor: Colors.grey.shade800,
       appBar: AppBar(
         backgroundColor: Colors.black,
         title: GestureDetector(
-          onTap: () {
-            _navigateToSearchScreen();
-          },
+          onTap: () {},
           child: const Text(
             'Search',
             style: TextStyle(color: Colors.white),
@@ -50,9 +47,9 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       body: ListView.builder(
-        itemCount: _movies.length,
+        itemCount: _searchResults.length,
         itemBuilder: (context, index) {
-          final show = _movies[index]['show'];
+          final show = _searchResults[index]['show'];
           final image = show['image'];
           final summary = show['summary'] ?? '';
           final truncatedSummary =
@@ -60,7 +57,7 @@ class _HomePageState extends State<HomePage> {
 
           return InkWell(
             onTap: () {
-              _navigateToMovieDetails(_movies[index]);
+              _navigateToMovieDetails(_searchResults[index]);
             },
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 2),
@@ -74,6 +71,7 @@ class _HomePageState extends State<HomePage> {
                     children: [
                       SizedBox(
                         height: 180,
+                        width: 128,
                         child: image != null && image['medium'] != null
                             ? Image.network(image['medium'])
                             : Image.network(
@@ -116,34 +114,6 @@ class _HomePageState extends State<HomePage> {
           );
         },
       ),
-      bottomNavigationBar: NavigationBar(
-        backgroundColor: Colors.black,
-        items: [
-          NavigationBarItem(
-            icon: Icons.home,
-            label: 'Home',
-            onTap: () {
-              // Handle Home tap
-            },
-            selected: true,
-          ),
-          NavigationBarItem(
-            icon: Icons.search,
-            label: 'Search',
-            onTap: () {
-              _navigateToSearchScreen();
-            },
-            selected: false,
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _navigateToSearchScreen() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const SearchScreen()),
     );
   }
 
@@ -152,69 +122,6 @@ class _HomePageState extends State<HomePage> {
       context,
       MaterialPageRoute(
         builder: (context) => MovieDetails(movieData: movieData),
-      ),
-    );
-  }
-}
-
-class NavigationBar extends StatelessWidget {
-  final Color backgroundColor;
-  final List<NavigationBarItem> items;
-
-  const NavigationBar({
-    super.key,
-    required this.backgroundColor,
-    required this.items,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: backgroundColor,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: items,
-      ),
-    );
-  }
-}
-
-class NavigationBarItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final bool selected;
-
-  const NavigationBarItem({
-    super.key,
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    required this.selected,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              color: selected ? Colors.lightBlue : Colors.white,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                color: selected ? Colors.lightBlue : Colors.white,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
